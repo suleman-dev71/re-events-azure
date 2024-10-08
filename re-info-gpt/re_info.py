@@ -178,5 +178,3 @@ def main_gpt_script():
     end_time = time.perf_counter()
     total_time = end_time - start_time
     print(f"\nTotal time taken: {total_time} seconds\n")
-
-main_gpt_script()

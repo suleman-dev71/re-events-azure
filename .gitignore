@@ -8,3 +8,7 @@ __*
 
 .vscode
 .env
+.funcignore
+
+thinkpad_ssh
+thinkpad_ssh.pub
