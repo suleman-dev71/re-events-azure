@@ -11,6 +11,9 @@ from azure.storage.blob import BlobServiceClient
 import sys
 import signal
 
+import os
+AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
+
 load_dotenv()
 
 # Initialize OpenAI Client
@@ -19,7 +22,7 @@ client = OpenAI()
 
 # Initialize BlobServiceClient
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey=rLjyQgvzuhQBoJbT0nxnPHTwoLzDqTsPBnBJVm7tTgAbC2moeaU4wmP6P6J2MFajzC+s8P30bSzx+ASt2YNzVg==;EndpointSuffix=core.windows.net")
+blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
 container_client = blob_service_client.get_container_client(container_name)
 
 manual_review = {"review_manually": []}

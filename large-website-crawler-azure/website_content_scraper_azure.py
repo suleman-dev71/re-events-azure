@@ -5,15 +5,17 @@ import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from azure.storage.blob import BlobServiceClient
 from exclusion import excluded_words
+import os
 
 client = ApifyClient("apify_api_8tYXptHW0uUKOE1kvn7UPhUqUgo4jG2nupQF")
 
 start_time = time.perf_counter()
 website_pattern = re.compile(r'^(https?://)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})$')
 max_concurrent_runs = 2
+AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
 
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey=rLjyQgvzuhQBoJbT0nxnPHTwoLzDqTsPBnBJVm7tTgAbC2moeaU4wmP6P6J2MFajzC+s8P30bSzx+ASt2YNzVg==;EndpointSuffix=core.windows.net")
+blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
 container_client = blob_service_client.get_container_client(container_name)
 
 # Blob File paths

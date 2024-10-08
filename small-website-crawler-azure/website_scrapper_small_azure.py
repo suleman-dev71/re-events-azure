@@ -9,6 +9,9 @@ from apify_client import ApifyClient
 from azure.storage.blob import BlobServiceClient
 from exclusion import excluded_words
 
+import os
+AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
+
 # Initialize Apify Client and Azure Blob Storage
 client = ApifyClient("apify_api_8tYXptHW0uUKOE1kvn7UPhUqUgo4jG2nupQF")
 start_time = time.perf_counter()
@@ -17,7 +20,7 @@ max_concurrent_runs = 3
 
 # Azure Blob Storage connection
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey=rLjyQgvzuhQBoJbT0nxnPHTwoLzDqTsPBnBJVm7tTgAbC2moeaU4wmP6P6J2MFajzC+s8P30bSzx+ASt2YNzVg==;EndpointSuffix=core.windows.net")
+blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
 container_client = blob_service_client.get_container_client(container_name)
 
 input_blob_path = "url-classifier-results/url-list/smaller_website_urls/smaller_sites_urls.json"

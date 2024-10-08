@@ -12,13 +12,16 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
 import logging
 
+import os
+AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
+
 json_file_path = "start-urls.json"
 excel_file_path = 're_2024.xlsx'
 larger_results_path = "results/url-list/larger_website_urls/"
 smaller_results_path = "results/url-list/smaller_website_urls/"
 
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey=rLjyQgvzuhQBoJbT0nxnPHTwoLzDqTsPBnBJVm7tTgAbC2moeaU4wmP6P6J2MFajzC+s8P30bSzx+ASt2YNzVg==;EndpointSuffix=core.windows.net")
+blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
 container_client = blob_service_client.get_container_client(container_name)
 
 # Blob File paths
