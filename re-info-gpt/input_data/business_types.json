@@ -1,0 +1,24 @@
+{
+  "Business Types": {
+      "Developer": "Project Development",
+      "Distributor/Reseller": "Product Supply/Distribution",
+      "Electric Utility": "Power Distribution/Utility Service",
+      "Engineering and Design Firm": "Engineering and Design",
+      "Engineering, Procurement, and Construction (EPC) Company": "Engineering, Procurement, and Construction (EPC)",
+      "Financier/Investor": "Finance",
+      "Education/Research Organization": "Education/Research",
+      "Government Agency": "Public Administration/Government",
+      "Installer/Contractor": "Installation",
+      "Legal Services Provider": "Legal Services",
+      "Logistics Company": "Logistics",
+      "Manufacturer": "Manufacturing",
+      "Marketing/Communications/PR Agency": "Marketing/Communications/PR",
+      "Recycling Company": "Recycling",
+      "Software Provider": "Software",
+      "Electrical Testing Company": "Electrical Testing",
+      "Independent Power Producer (IPP)": "Non-Utility Generation",
+      "Operation and Maintenance (O&M) Company": "Operation and Maintenance (O&M)",
+      "Non-Profit/NGO": "",
+      "Workforce Solutions Provider": "Staffing"
+  }
+}

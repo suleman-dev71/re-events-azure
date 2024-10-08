@@ -1,0 +1,252 @@
+{
+    "aeroseal.com_data.json": null,
+    "126.com_data.json": {
+        "business_description": "Not Found",
+        "primary_business_types": [
+            "Other"
+        ],
+        "secondary_business_types": [
+            "Other"
+        ],
+        "products": "Not Found",
+        "technology_sectors": "Not Found",
+        "mapped_products": {},
+        "customer_types": "Not Found",
+        "url": "https://126.com/",
+        "exhibitor id": 8800172
+    },
+    "abcsupply.com_data.json": {
+        "business_description": "ABC Supply is a leading distributor of roofing, siding, windows, and other exterior building products in the United States. The company offers a wide range of products for both steep-slope and low-slope roofing, including asphalt shingles, metal roofing, and concrete and clay roof tiles. Additionally, ABC Supply provides decking, railing, windows, doors, and renewable energy solutions such as EV charging systems. The company is committed to supporting contractors with training resources and industry associations.",
+        "primary_business_types": [
+            "Distributor/Reseller"
+        ],
+        "secondary_business_types": [
+            "Other"
+        ],
+        "products": [
+            "steep-slope roofing",
+            "low-slope roofing",
+            "decking",
+            "railing",
+            "windows",
+            "doors",
+            "EV charging systems"
+        ],
+        "technology_sectors": [
+            "E-Mobility / Electric Vehicles"
+        ],
+        "mapped_products": {
+            "EV charging systems": "AC Charging Systems"
+        },
+        "customer_types": [
+            "Residential (i.e., Home Owners)",
+            "Commercial",
+            "Industrial"
+        ],
+        "url": "https://abcsupply.com/",
+        "exhibitor id": 8800551
+    },
+    "1climate.app_data.json": {
+        "business_description": "1Climate is a software provider focused on delivering innovative solutions for climate action. Their platform enables users to track and manage their carbon footprint, facilitating the transition to a more sustainable future. By leveraging advanced technology, 1Climate aims to empower individuals and organizations to make informed decisions about their environmental impact.",
+        "primary_business_types": [
+            "Software Provider",
+            "Other"
+        ],
+        "secondary_business_types": [
+            "Other"
+        ],
+        "products": "Not Found",
+        "technology_sectors": "Energy Efficiency",
+        "mapped_products": {},
+        "customer_types": "Residential (i.e., Home Owners), Commercial, Industrial, Government (e.g. Municipalities, Federal Agencies)",
+        "url": "https://1climate.app/",
+        "exhibitor id": 32410213
+    },
+    "acelerex.com_data.json": {
+        "business_description": "Acelerex specializes in providing advanced software solutions, data services, and consulting for the energy sector. Their offerings include grid analytics software, clean energy planning tools, and intelligent software for power grid sustainability. They also offer testing services and automation solutions to enhance the efficiency and reliability of energy systems. Acelerex aims to support the transition to clean energy through innovative technology and strategic partnerships.",
+        "primary_business_types": [
+            "Software Provider",
+            "Other"
+        ],
+        "secondary_business_types": [
+            "Engineering and Design Firm",
+            "Other"
+        ],
+        "products": [
+            "grid analytics software",
+            "clean energy planning tools",
+            "intelligent software",
+            "testing services",
+            "automation solutions"
+        ],
+        "technology_sectors": [
+            "Energy Storage",
+            "Microgrids",
+            "Energy Efficiency"
+        ],
+        "mapped_products": {
+            "grid analytics software": "Performance Monitoring and Analytics Software",
+            "clean energy planning tools": "Design and Simulation Software",
+            "intelligent software": "Energy Management Systems (EMS)",
+            "testing services": "Not Found",
+            "automation solutions": "Not Found"
+        },
+        "customer_types": [
+            "Commercial",
+            "Industrial",
+            "Utility",
+            "Government (e.g. Municipalities, Federal Agencies)"
+        ],
+        "url": "https://acelerex.com/",
+        "exhibitor id": 8800215
+    },
+    "advantageaustria-data.json": {
+        "business_description": "ADVANTAGE AUSTRIA is Austria's official trade promotion organization. It provides a broad range of intelligence and business development services for both Austrian companies and their international business partners. With over 100 offices in more than 70 countries, ADVANTAGE AUSTRIA offers a comprehensive network of contacts and expertise to support Austrian businesses in their international endeavors.",
+        "primary_business_types": [
+            "Government Agency"
+        ],
+        "secondary_business_types": [
+            "Other"
+        ],
+        "products": "Not Found",
+        "technology_sectors": "Not Found",
+        "mapped_products": {},
+        "customer_types": [
+            "Commercial",
+            "Government (e.g. Municipalities, Federal Agencies)"
+        ],
+        "url": "https://advantageaustria.org/us/zentral/footer/About_us.en.html",
+        "exhibitor id": 32409920
+    },
+    "admsolarpower.com_data.json": {
+        "business_description": "ADM Solar Power specializes in providing comprehensive solar energy solutions, including project development, engineering, procurement, and construction (EPC) services. The company is dedicated to advancing renewable energy infrastructure and offers a range of solar products and technologies to support various energy needs.",
+        "primary_business_types": [
+            "Engineering, Procurement, and Construction (EPC) Company"
+        ],
+        "secondary_business_types": [
+            "Manufacturer",
+            "Distributor/Reseller"
+        ],
+        "products": [
+            "ADM Orient X-Cel",
+            "ADM Orient X-Amp",
+            "ADM Orient X-Press",
+            "ADM Orient XLP"
+        ],
+        "technology_sectors": [
+            "Solar"
+        ],
+        "mapped_products": {
+            "ADM Orient X-Cel": "Crystalline Modules/Panels",
+            "ADM Orient X-Amp": "Crystalline Modules/Panels",
+            "ADM Orient X-Press": "Crystalline Modules/Panels",
+            "ADM Orient XLP": "Crystalline Modules/Panels"
+        },
+        "customer_types": [
+            "Residential (i.e., Home Owners)",
+            "Commercial",
+            "Industrial",
+            "Utility",
+            "Government (e.g. Municipalities, Federal Agencies)"
+        ],
+        "url": "https://admsolarpower.com/",
+        "exhibitor id": 32410084
+    },
+    "accure.net_data.json": {
+        "business_description": "ACCURE provides advanced battery analytics solutions designed to enhance the safety, performance, and longevity of battery systems. Their offerings include tools for battery safety management, performance optimization, lifetime extension, and warranty coverage. ACCURE serves various sectors including automotive, e-bus fleets, grid-scale energy storage, and maritime applications, leveraging data-driven insights to improve battery reliability and efficiency.",
+        "primary_business_types": [
+            "Software Provider"
+        ],
+        "secondary_business_types": [
+            "Other"
+        ],
+        "products": [
+            "Battery Safety Manager",
+            "Performance Manager",
+            "Lifetime Manager",
+            "Warranty Coverage",
+            "BESS Commissioning",
+            "BESS Insurance"
+        ],
+        "technology_sectors": [
+            "Energy Storage",
+            "E-Mobility / Electric Vehicles",
+            "Marine & Hydro"
+        ],
+        "mapped_products": {
+            "Battery Safety Manager": "Battery Management Systems (BMS) Software",
+            "Performance Manager": "Performance Monitoring and Analytics Software",
+            "Lifetime Manager": "Predictive Maintenance Software",
+            "Warranty Coverage": "Not Found",
+            "BESS Commissioning": "Complete Energy Storage Systems (ESS)",
+            "BESS Insurance": "Not Found"
+        },
+        "customer_types": [
+            "Commercial",
+            "Industrial",
+            "Utility",
+            "Government (e.g. Municipalities, Federal Agencies)"
+        ],
+        "url": "https://accure.net/",
+        "exhibitor id": 8800257
+    },
+    "absen.com_data.json": {
+        "business_description": "Absen is a leading manufacturer of high-quality LED display solutions, offering a wide range of products for various applications including indoor, outdoor, rental, and all-in-one screens. The company caters to diverse markets such as enterprise, education, broadcasting, sports, and more, providing innovative and energy-efficient LED display technologies. Absen is committed to delivering exceptional visual experiences and reliable support services to its global clientele.",
+        "primary_business_types": [
+            "Manufacturer"
+        ],
+        "secondary_business_types": [
+            "Other"
+        ],
+        "products": [
+            "indoor LED displays",
+            "outdoor LED displays",
+            "rental LED displays",
+            "all-in-one screens",
+            "microLED",
+            "virtual production screens"
+        ],
+        "technology_sectors": [
+            "Energy Efficiency"
+        ],
+        "mapped_products": {
+            "indoor LED displays": "Energy-Efficient Lighting",
+            "outdoor LED displays": "Energy-Efficient Lighting",
+            "rental LED displays": "Energy-Efficient Lighting",
+            "all-in-one screens": "Energy-Efficient Lighting",
+            "microLED": "Energy-Efficient Lighting",
+            "virtual production screens": "Energy-Efficient Lighting"
+        },
+        "customer_types": [
+            "Commercial",
+            "Industrial",
+            "Government (e.g. Municipalities, Federal Agencies)",
+            "Hospitals"
+        ],
+        "url": "https://absen.com/",
+        "exhibitor id": 7722
+    },
+    "abovesurveying.com_data.json": {
+        "business_description": "Above Surveying specializes in providing advanced aerial inspection and mapping solutions for the solar industry. Utilizing cutting-edge drone technology, they offer services such as topographic mapping, construction management, aerial thermographic solar inspection, and ultra-high-definition inspections. Their innovative solutions help in ensuring quality control from factory to field, addressing technology risks in module manufacturing, and monitoring the condition of aging solar assets. They also offer the SolarGain platform for comprehensive solar asset management.",
+        "primary_business_types": [
+            "Engineering and Design Firm",
+            "Operation and Maintenance (O&M) Company"
+        ],
+        "secondary_business_types": [
+            "Other"
+        ],
+        "products": "Not Found",
+        "technology_sectors": [
+            "Solar"
+        ],
+        "mapped_products": "Not Found",
+        "customer_types": [
+            "Commercial",
+            "Industrial",
+            "Utility",
+            "Government (e.g. Municipalities, Federal Agencies)"
+        ],
+        "url": "https://abovesurveying.com/",
+        "exhibitor id": 35225
+    }
+}

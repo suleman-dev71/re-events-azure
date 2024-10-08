@@ -1,0 +1,10 @@
+env
+venv
+.venv
+
+.python_packages
+__pycache*
+__*
+
+.vscode
+.env
