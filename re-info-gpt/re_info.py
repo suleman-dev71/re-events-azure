@@ -10,7 +10,6 @@ import re
 from azure.storage.blob import BlobServiceClient
 import sys
 import signal
-
 import os
 AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
 
