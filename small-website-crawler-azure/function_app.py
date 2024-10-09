@@ -6,7 +6,7 @@ from website_scrapper_small_azure import small_site_crawler
 
 app = func.FunctionApp()
 
-@app.route(route="small_website_crawler", auth_level=func.AuthLevel.ANONYMOUS)
+@app.route(route="", auth_level=func.AuthLevel.ANONYMOUS)
 def small_website_crawler(req: func.HttpRequest) -> func.HttpResponse:
    logging.info('Small Websites Scraper processing request.')
    try:

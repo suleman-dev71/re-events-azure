@@ -6,7 +6,7 @@ from test_scraper import test_main_url_extractor
 app = func.FunctionApp()
 
 # todo: restrict auth level
-@app.route(route="url-scraper", auth_level=func.AuthLevel.ANONYMOUS)
+@app.route(route="", auth_level=func.AuthLevel.ANONYMOUS)
 def url_scraper(req: func.HttpRequest) -> func.HttpResponse:
     # todo:logs retention in daignostic settings
     logging.info('Python HTTP trigger function processed a request.')
