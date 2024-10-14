@@ -11,22 +11,24 @@ from azure.storage.blob import BlobServiceClient
 import sys
 import signal
 import os
-AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
+
+from dotenv import load_dotenv
 
 load_dotenv()
+AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 
-# Initialize OpenAI Client
+load_dotenv()
 client = OpenAI()
 
 
 # Initialize BlobServiceClient
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
+blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
 container_client = blob_service_client.get_container_client(container_name)
 
 manual_review = {"review_manually": []}
-result_path = "GPT-results/"
-input_path = "output/"
+result_path = "RE-Events-14-Oct-run4/GPT-results/"
+input_path = "RE-Events-14-Oct-run4/website_content/"
 ratelimit_delay = 65
 retries = 0
 start_time = time.perf_counter()
@@ -151,14 +153,14 @@ def main_gpt_script():
 
             # Load existing manual reviews and results from Azure Blob Storage if they exist
             try:
-                manual_review_blob = f"{result_path}/manual_review.json"
+                manual_review_blob = f"{result_path}manual_review_gpt_4o_14_Oct.json"
                 manual_review_data = download_blob(manual_review_blob)
                 manual_review["review_manually"].extend(manual_review_data.get("review_manually", []))
             except Exception as e:
                 print(f"No previous manual reviews found or failed to download: {e}")
 
             try:
-                result_blob = f"{result_path}/results.json"
+                result_blob = f"{result_path}results_gpt_4o_14_Oct.json"
                 existing_results = download_blob(result_blob)
                 existing_results.update(results)
                 results = existing_results
@@ -166,16 +168,16 @@ def main_gpt_script():
                 print(f"No previous results found or failed to download: {e}")
 
             # Save results and manual reviews to Azure Blob Storage
-            upload_blob(f"{result_path}/manual_review.json", manual_review)
-            upload_blob(f"{result_path}/results.json", results)
+            upload_blob(f"{result_path}manual_review_gpt_4o_14_Oct.json", manual_review)
+            upload_blob(f"{result_path}results_gpt_4o_14_Oct.json", results)
 
             # Wait for a short time before checking the folder again
             time.sleep(5)
 
     except KeyboardInterrupt:
         print("Process interrupted. Saving data...")
-        upload_blob(f"{result_path}/manual_review.json", manual_review)
-        upload_blob(f"{result_path}/results.json", results)
+        upload_blob(f"{result_path}manual_review_gpt_4o_14_Oct.json", manual_review)
+        upload_blob(f"{result_path}results.json_gpt_4o_14_Oct", results)
 
     end_time = time.perf_counter()
     total_time = end_time - start_time

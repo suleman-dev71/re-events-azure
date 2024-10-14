@@ -8,23 +8,28 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from apify_client import ApifyClient
 from azure.storage.blob import BlobServiceClient
 from exclusion import excluded_words
-
 import os
-AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
+from dotenv import load_dotenv
+from concurrent.futures import TimeoutError
 
-# Initialize Apify Client and Azure Blob Storage
-client = ApifyClient("apify_api_8tYXptHW0uUKOE1kvn7UPhUqUgo4jG2nupQF")
+
+
+load_dotenv()
+AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+APIFY_CLIENT_API = os.getenv ('APIFY_CLIENT_API')
+
+client = ApifyClient(APIFY_CLIENT_API)
 start_time = time.perf_counter()
 website_pattern = re.compile(r'^(https?://)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})$')
 max_concurrent_runs = 3
 
 # Azure Blob Storage connection
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
+blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
 container_client = blob_service_client.get_container_client(container_name)
 
-input_blob_path = "url-classifier-results/url-list/smaller_website_urls/smaller_sites_urls.json"
-output_blob_path = "output/"
+input_blob_path = "RE-Events-14-Oct-run4/scraper_results/url-list/smaller_website_urls/smaller_sites_urls.json"
+output_blob_path = "RE-Events-14-Oct-run4/website_content/"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -59,7 +64,7 @@ def extract_website_name(url):
     return hostname.split('.')[0] if hostname.startswith('www.') else hostname
 
 # Function to run Apify actor and store results in Azure Blob Storage
-def run_actor(url):
+def run_actor(url, timeout = 80):
     total_site_data = []
     url = ensure_https(url)
 
@@ -81,7 +86,7 @@ def run_actor(url):
         "expandIframes": True,
         "ignoreCanonicalUrl": False,
         "keepUrlFragments": False,
-        "maxCrawlPages": 25,
+        "maxCrawlPages": 30,
         "proxyConfiguration": {
             "useApifyProxy": True,
             "apifyProxyGroups": []
@@ -101,7 +106,8 @@ def run_actor(url):
 
     logging.info(f"Now Crawling: {url}")
     try:
-        run = client.actor("apify/website-content-crawler").call(run_input=run_input)
+        # Set the timeout in the call to the actor
+        run = client.actor("apify/website-content-crawler").call(run_input=run_input, timeout_secs=timeout)
     except Exception as e:
         logging.error(f"Error crawling {url}: {e}")
         return
@@ -123,15 +129,16 @@ def run_actor(url):
     output_blob_name = f"{output_blob_path}{website_name}_data.json"
     upload_data_to_blob(output_blob_name, total_site_data)
 
+
 def small_site_crawler():
     url_list = load_urls_from_blob(input_blob_path)
-    total_number_of_websites = len(url_list)
-
     with ThreadPoolExecutor(max_workers=max_concurrent_runs) as executor:
         futures = [executor.submit(run_actor, url) for url in url_list]
         for future in as_completed(futures):
             try:
                 future.result()
+            except TimeoutError:
+                logging.error(f"Timeout: A request took longer than time limit")
             except Exception as e:
                 logging.error(f"An error occurred: {e}")
 

@@ -6,21 +6,26 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from azure.storage.blob import BlobServiceClient
 from exclusion import excluded_words
 import os
+from dotenv import load_dotenv
+from concurrent.futures import TimeoutError
 
-client = ApifyClient("apify_api_8tYXptHW0uUKOE1kvn7UPhUqUgo4jG2nupQF")
 
+load_dotenv()
 start_time = time.perf_counter()
 website_pattern = re.compile(r'^(https?://)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})$')
 max_concurrent_runs = 2
-AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
+AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+APIFY_CLIENT_API = os.getenv('APIFY_CLIENT_API')
+
 
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
+blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
 container_client = blob_service_client.get_container_client(container_name)
+client = ApifyClient(APIFY_CLIENT_API)
 
 # Blob File paths
-input_blob_name = "results/sorted-url-lists/"
-output_blob_name = "results/websites_content/"
+input_blob_name = "RE-Events-14-Oct-run4/url-classifier-results/sorted-url-lists/"
+output_blob_path = "RE-Events-14-Oct-run4/website_content/"
 
 def read_json_blob(blob_name):
     """Read the JSON file from Azure Blob Storage."""
@@ -35,7 +40,7 @@ def upload_json_blob(blob_name, data):
     json_data = json.dumps(data, indent=4)
     blob_client.upload_blob(json_data, overwrite=True)
 
-def run_actor(file_blob_name):
+def run_actor(file_blob_name, timeout=80):
     data = read_json_blob(file_blob_name)
     
     if isinstance(data, list) and all(isinstance(url, str) for url in data):
@@ -87,7 +92,14 @@ def run_actor(file_blob_name):
         }
 
         print(f"\nNow Doing: {url}")
-        run = client.actor("apify/website-content-crawler").call(run_input=run_input)
+
+        try:
+            # Add Apify's timeoutSecs to limit the Actor's execution time
+            run = client.actor("apify/website-content-crawler").call(run_input=run_input, timeout_secs=timeout)
+
+        except TimeoutError:
+            print(f"Timeout: The request for {url} took longer than the limit")
+            continue 
 
         match = website_pattern.search(url)
 
@@ -109,7 +121,8 @@ def run_actor(file_blob_name):
                 'url': url,
                 'content': content
             })
-    output_blob_name = f"output/{website_name}-data.json"
+    
+    output_blob_name = f"{output_blob_path}{website_name}-data.json"
     upload_json_blob(output_blob_name, total_site_data)
     return website_name
 
@@ -126,7 +139,6 @@ def website_crawler():
                 future.result()
             except Exception as e:
                 print(f"An error occurred: {e}")
-
 
     end_time = time.perf_counter()
     total_time = end_time - start_time

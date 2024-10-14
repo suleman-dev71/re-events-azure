@@ -13,13 +13,14 @@ from dotenv import load_dotenv
 import logging
 
 load_dotenv()
+AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_KEY')
 
 
 # todo: add connection string to secrets or config
 # todo: add authentication the blob
 # connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=reeventsstorage;AccountKey=rLjyQgvzuhQBoJbT0nxnPHTwoLzDqTsPBnBJVm7tTgAbC2moeaU4wmP6P6J2MFajzC+s8P30bSzx+ASt2YNzVg==;BlobEndpoint=https://reeventsstorage.blob.core.windows.net/;FileEndpoint=https://reeventsstorage.file.core.windows.net/;QueueEndpoint=https://reeventsstorage.queue.core.windows.net/;TableEndpoint=https://reeventsstorage.table.core.windows.net/")
+blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
 container_client = blob_service_client.get_container_client(container_name)
 
 # File paths

@@ -1,14 +1,17 @@
-env
-venv
-.venv
+/env
+/venv
+/.venv
+/venv
 
-.python_packages
+/.python_packages
 __pycache*
+/TestResults
+/results
 __*
 
-.vscode
+/.vscode
 .env
-.funcignore
+/.funcignore
 
 thinkpad_ssh
 thinkpad_ssh.pub

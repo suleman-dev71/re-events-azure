@@ -4,21 +4,19 @@ from openai import OpenAI
 import json
 import time
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
-import os
-AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY')
-
-
-container_name = "re-events-v1"
-blob_service_client = BlobServiceClient.from_connection_string(f"DefaultEndpointsProtocol=https;AccountName=reeventsstorage;AccountKey={AZURE_STORAGE_KEY};EndpointSuffix=core.windows.net")
-container_client = blob_service_client.get_container_client(container_name)
+from dotenv import load_dotenv
 
 load_dotenv()
-results = {}
-urls_folder_path = "results/url-list/larger_website_urls/"
-results_folder_path = "results/sorted-url-lists/"
+AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 
-urls_blob_folder = "url-classifier-results/url-list/larger_website_urls/"
-output_blob_folder = "url-classifier-results/sorted-url-lists/"
+container_name = "re-events-v1"
+blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+container_client = blob_service_client.get_container_client(container_name)
+
+results = {}
+
+urls_blob_folder = "RE-Events-14-Oct-run4/scraper_results/url-list/larger_website_urls/"
+output_blob_folder = "RE-Events-14-Oct-run4/url-classifier-results/sorted-url-lists/"
 
 client = OpenAI()
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
@@ -42,7 +40,6 @@ def openai_call(data, resp_format="json"):
 
     if isinstance(data, list) and all(isinstance(url, str) for url in data):
         urls = data
-    print (urls)
     index = int(len(urls)*0.8)
     clean_urls = urls[0:index]
 
@@ -88,30 +85,24 @@ Here are the URLs to classify:
     return response.choices[0].message.content
 
 def classify_urls():
-    """Main function to classify URLs from blobs and save results locally."""
-    os.makedirs(results_folder_path, exist_ok=True)
+    """Main function to classify URLs from blobs and save results to Blob Storage."""
     # List all blobs in the specified folder path
     blob_list = container_client.list_blobs(name_starts_with=urls_blob_folder)
-  
-    existing_files = [blob.name for blob in blob_list if blob.name.endswith('.json')]
  
-    for blob_name in existing_files:
-        print(f"Processing blob: {blob_name}")
+    existing_files = [blob.name for blob in blob_list if blob.name.endswith('.json')]
 
+    for blob_name in existing_files:
         data = download_blob_to_string(blob_name)
         result = openai_call(data)
         result = json.loads(result)
         result_filename = blob_name.replace('.json', '-sorted.json').replace(urls_blob_folder, '')
-        result_file_path = os.path.join(results_folder_path, result_filename)
-        
 
-        result_filename = blob_name.replace('.json', '-sorted.json').replace(urls_blob_folder, '')
-        blob_file_path = os.path.join(results_folder_path, result_filename).replace("\\", "/")
+        # Directly save to blob storage without creating local files
+        blob_file_path = os.path.join(output_blob_folder, result_filename).replace("\\", "/")
         upload_data_to_blob(result, blob_file_path)
-        print(f"Processed {blob_name} into {result_file_path}")
+        print(f"Processed {blob_name} into {blob_file_path}")
 
     end_time = time.perf_counter()
     total_time = end_time - start_time
     print(f"\nTotal time taken: {total_time} seconds\n")
     return result
-

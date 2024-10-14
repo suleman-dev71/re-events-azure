@@ -101,5 +101,3 @@ def small_site_crawler():
     end_time = time.perf_counter()
     total_time = end_time - start_time
     print (f"\nTotal time taken: {total_time} seconds\n")
-
-small_site_crawler()
