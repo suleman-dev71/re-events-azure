@@ -4,10 +4,15 @@ python -m venv venv
 Activate the virtual environment:
 source venv/bin/activate
 
+Add these enviroment variables to .env:
+OPENAI_API_KEY
+AZURE_STORAGE_CONNECTION_STRING
+APIFY_CLIENT_API
+
 Install requirements:
 pip install -r requirements.txt
 
-Start function locally with:
+Navigate inside the folder of each Function App and Start locally:
 func start
 
 Publish function to Azure:
