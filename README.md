@@ -12,6 +12,8 @@ APIFY_CLIENT_API
 Install requirements:
 pip install -r requirements.txt
 
+Add a local.settings.json file for each of the Function App
+
 Navigate inside the folder of each Function App and Start locally:
 func start
 
