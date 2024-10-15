@@ -5,18 +5,19 @@ import json
 import time
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
+import logging
+from const import BASE_FOLDER, CONTAINER_NAME
 
 load_dotenv()
 AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 
-container_name = "re-events-v1"
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
-container_client = blob_service_client.get_container_client(container_name)
+container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
 results = {}
 
-urls_blob_folder = "RE-Events-14-Oct-run4/scraper_results/url-list/larger_website_urls/"
-output_blob_folder = "RE-Events-14-Oct-run4/url-classifier-results/sorted-url-lists/"
+urls_blob_folder = f"{BASE_FOLDER}/scraper_results/url-list/larger_website_urls/"
+output_blob_folder = f"{BASE_FOLDER}/url-classifier-results/sorted-url-lists/"
 
 client = OpenAI()
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
@@ -33,7 +34,7 @@ def download_blob_to_string(blob_name):
 def upload_data_to_blob(data, blob_name):
     blob_client = container_client.get_blob_client(blob_name)
     blob_client.upload_blob(json.dumps(data), overwrite=True)
-    print(f"Uploaded data to Blob Storage at {blob_name}")
+    logging.info(f"Uploaded data to Blob Storage at {blob_name}")
 
 
 def openai_call(data, resp_format="json"):
@@ -100,9 +101,9 @@ def classify_urls():
         # Directly save to blob storage without creating local files
         blob_file_path = os.path.join(output_blob_folder, result_filename).replace("\\", "/")
         upload_data_to_blob(result, blob_file_path)
-        print(f"Processed {blob_name} into {blob_file_path}")
+        logging.info(f"Processed {blob_name} into {blob_file_path}")
 
     end_time = time.perf_counter()
     total_time = end_time - start_time
-    print(f"\nTotal time taken: {total_time} seconds\n")
+    logging.info(f"\nTotal time taken: {total_time} seconds\n")
     return result

@@ -8,7 +8,8 @@ from exclusion import excluded_words
 import os
 from dotenv import load_dotenv
 from concurrent.futures import TimeoutError
-
+import logging
+from const import CONTAINER_NAME, BASE_FOLDER
 
 load_dotenv()
 start_time = time.perf_counter()
@@ -18,14 +19,13 @@ AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 APIFY_CLIENT_API = os.getenv('APIFY_CLIENT_API')
 
 
-container_name = "re-events-v1"
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
-container_client = blob_service_client.get_container_client(container_name)
+container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 client = ApifyClient(APIFY_CLIENT_API)
 
 # Blob File paths
-input_blob_name = "RE-Events-14-Oct-run4/url-classifier-results/sorted-url-lists/"
-output_blob_path = "RE-Events-14-Oct-run4/website_content/"
+input_blob_name = f"{BASE_FOLDER}/url-classifier-results/sorted-url-lists/"
+output_blob_path = f"{BASE_FOLDER}/website_content/"
 
 def read_json_blob(blob_name):
     """Read the JSON file from Azure Blob Storage."""
@@ -46,7 +46,7 @@ def run_actor(file_blob_name, timeout=80):
     if isinstance(data, list) and all(isinstance(url, str) for url in data):
         urls = data
     else:
-        print(f"Unexpected data format in blob {file_blob_name}: {type(data).__name__}, Content: {data}")
+        logging.info(f"Unexpected data format in blob {file_blob_name}: {type(data).__name__}, Content: {data}")
         raise ValueError(f"Unexpected data format in blob {file_blob_name}: Expected a list of URLs")
     
     total_site_data = []
@@ -91,14 +91,14 @@ def run_actor(file_blob_name, timeout=80):
             "useSitemaps": False
         }
 
-        print(f"\nNow Doing: {url}")
+        logging.info(f"\nNow Doing: {url}")
 
         try:
             # Add Apify's timeoutSecs to limit the Actor's execution time
             run = client.actor("apify/website-content-crawler").call(run_input=run_input, timeout_secs=timeout)
 
         except TimeoutError:
-            print(f"Timeout: The request for {url} took longer than the limit")
+            logging.info(f"Timeout: The request for {url} took longer than the limit")
             continue 
 
         match = website_pattern.search(url)
@@ -138,8 +138,8 @@ def website_crawler():
             try:
                 future.result()
             except Exception as e:
-                print(f"An error occurred: {e}")
+                logging.info(f"An error occurred: {e}")
 
     end_time = time.perf_counter()
     total_time = end_time - start_time
-    print(f"\nTotal time taken: {total_time} seconds\n")
+    logging.info(f"\nTotal time taken: {total_time} seconds\n")

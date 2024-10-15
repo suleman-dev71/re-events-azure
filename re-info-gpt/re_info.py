@@ -11,8 +11,9 @@ from azure.storage.blob import BlobServiceClient
 import sys
 import signal
 import os
-
+import logging
 from dotenv import load_dotenv
+from const import BASE_FOLDER, CONTAINER_NAME
 
 load_dotenv()
 AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
@@ -20,15 +21,12 @@ AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 load_dotenv()
 client = OpenAI()
 
-
-# Initialize BlobServiceClient
-container_name = "re-events-v1"
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
-container_client = blob_service_client.get_container_client(container_name)
+container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
 manual_review = {"review_manually": []}
-result_path = "RE-Events-14-Oct-run4/GPT-results/"
-input_path = "RE-Events-14-Oct-run4/website_content/"
+result_path = f"{BASE_FOLDER}/GPT-results/"
+input_path = f"{BASE_FOLDER}/website_content/"
 ratelimit_delay = 65
 retries = 0
 start_time = time.perf_counter()
@@ -65,11 +63,11 @@ def opnenai_call(prompt, resp_format="json_object"):
         )
         return response.choices[0].message.content
     except openai.RateLimitError as e:
-        print(f"Rate limit exceeded: {e}")
+        logging.info(f"Rate limit exceeded: {e}")
         time.sleep(ratelimit_delay)
         return opnenai_call(prompt)
     except openai.OpenAIError as e:
-        print(f"An OpenAI error occurred: {e}")
+        logging.info(f"An OpenAI error occurred: {e}")
         raise e
 
 def main_gpt_script():
@@ -80,7 +78,7 @@ def main_gpt_script():
         try:
             data = download_blob(blob_name)
         except Exception as e:
-            print(f"Failed to download or parse blob {blob_name}: {e}")
+            logging.info(f"Failed to download or parse blob {blob_name}: {e}")
             return "error"
 
         token_limit = 120000
@@ -99,7 +97,7 @@ def main_gpt_script():
 
         tokens = len(alltext) / 4
         if tokens > token_limit:
-            print(f"tokens more than {token_limit}")
+            logging.info(f"tokens more than {token_limit}")
             manual_review["review_manually"].append(blob_name)
             return "error"
 
@@ -109,9 +107,9 @@ def main_gpt_script():
             result["url"] = url
             result["exhibitor id"] = exhibitor_id_search(url)
             result.pop("reasoning_and_references", None)
-            print("prompt 1 done\n")
+            logging.info("prompt 1 done\n")
         except:
-            print("prompt 1 failed\n")
+            logging.info("prompt 1 failed\n")
             return "error"
 
         return result
@@ -124,11 +122,11 @@ def main_gpt_script():
             new_files = [f for f in json_files if f not in processed_files]
 
             if len(json_files) == len(processed_files):
-                print("All files have been processed.")
+                logging.info("All files have been processed.")
                 break
 
             for blob_name in new_files:
-                print(f"Processing blob: {blob_name}")
+                logging.info(f"Processing blob: {blob_name}")
                 success = False
                 retry_attempts = 0
 
@@ -142,43 +140,43 @@ def main_gpt_script():
                         break
                     else:
                         retry_attempts += 1
-                        print(f"Error processing {blob_name}, retrying... ({retry_attempts}/{max_retries})")
+                        logging.info(f"Error processing {blob_name}, retrying... ({retry_attempts}/{max_retries})")
                         time.sleep(2)  # Optional: Add delay between retries
 
                 # If retries exhausted, add file to manual review
                 if not success:
-                    print(f"Exhausted retries for {blob_name}, adding to manual review.")
+                    logging.info(f"Exhausted retries for {blob_name}, adding to manual review.")
                     manual_review["review_manually"].append(blob_name)
                     processed_files.add(blob_name)  # Mark as processed to avoid retry loop
 
             # Load existing manual reviews and results from Azure Blob Storage if they exist
             try:
-                manual_review_blob = f"{result_path}manual_review_gpt_4o_14_Oct.json"
+                manual_review_blob = f"{result_path}manual_review_gpt_4o_15_Oct_run.json"
                 manual_review_data = download_blob(manual_review_blob)
                 manual_review["review_manually"].extend(manual_review_data.get("review_manually", []))
             except Exception as e:
-                print(f"No previous manual reviews found or failed to download: {e}")
+                logging.info(f"No previous manual reviews found or failed to download: {e}")
 
             try:
-                result_blob = f"{result_path}results_gpt_4o_14_Oct.json"
+                result_blob = f"{result_path}results_gpt_4o_15_Oct_run.json"
                 existing_results = download_blob(result_blob)
                 existing_results.update(results)
                 results = existing_results
             except Exception as e:
-                print(f"No previous results found or failed to download: {e}")
+                logging.info(f"No previous results found or failed to download: {e}")
 
             # Save results and manual reviews to Azure Blob Storage
-            upload_blob(f"{result_path}manual_review_gpt_4o_14_Oct.json", manual_review)
-            upload_blob(f"{result_path}results_gpt_4o_14_Oct.json", results)
+            upload_blob(f"{result_path}manual_review_gpt_4o_15_Oct_run.json", manual_review)
+            upload_blob(f"{result_path}results_gpt_4o_15_Oct_run.json", results)
 
             # Wait for a short time before checking the folder again
             time.sleep(5)
 
     except KeyboardInterrupt:
-        print("Process interrupted. Saving data...")
-        upload_blob(f"{result_path}manual_review_gpt_4o_14_Oct.json", manual_review)
-        upload_blob(f"{result_path}results.json_gpt_4o_14_Oct", results)
+        logging.info("Process interrupted. Saving data...")
+        upload_blob(f"{result_path}manual_review_gpt_4o_15_Oct_run.json", manual_review)
+        upload_blob(f"{result_path}results.json_gpt_4o_15_Oct_run", results)
 
     end_time = time.perf_counter()
     total_time = end_time - start_time
-    print(f"\nTotal time taken: {total_time} seconds\n")
+    logging.info(f"\nTotal time taken: {total_time} seconds\n")

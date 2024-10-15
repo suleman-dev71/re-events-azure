@@ -11,8 +11,7 @@ from exclusion import excluded_words
 import os
 from dotenv import load_dotenv
 from concurrent.futures import TimeoutError
-
-
+from const import BASE_FOLDER, CONTAINER_NAME
 
 load_dotenv()
 AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
@@ -23,13 +22,11 @@ start_time = time.perf_counter()
 website_pattern = re.compile(r'^(https?://)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})$')
 max_concurrent_runs = 3
 
-# Azure Blob Storage connection
-container_name = "re-events-v1"
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
-container_client = blob_service_client.get_container_client(container_name)
+container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
-input_blob_path = "RE-Events-14-Oct-run4/scraper_results/url-list/smaller_website_urls/smaller_sites_urls.json"
-output_blob_path = "RE-Events-14-Oct-run4/website_content/"
+input_blob_path = f"{BASE_FOLDER}/scraper_results/url-list/smaller_website_urls/smaller_sites_urls.json"
+output_blob_path = f"{BASE_FOLDER}/website_content/"
 
 logging.basicConfig(level=logging.INFO)
 

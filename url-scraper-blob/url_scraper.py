@@ -16,9 +16,6 @@ load_dotenv()
 AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_KEY')
 
 
-# todo: add connection string to secrets or config
-# todo: add authentication the blob
-# connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 container_name = "re-events-v1"
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
 container_client = blob_service_client.get_container_client(container_name)

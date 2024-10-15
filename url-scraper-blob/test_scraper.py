@@ -14,25 +14,19 @@ import logging
 import os
 import pandas as pd
 from io import BytesIO
-
+from const import BASE_FOLDER, CONTAINER_NAME
 
 load_dotenv()
 AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 
-json_file_path = "start-urls.json"
-excel_file_path = 're_2024.xlsx'
-larger_results_path = "results/url-list/larger_website_urls/"
-smaller_results_path = "results/url-list/smaller_website_urls/"
-
-container_name = "re-events-v1"
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
-container_client = blob_service_client.get_container_client(container_name)
+container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
 # Blob File paths
 json_blob_name = "start-urls.json"
 excel_blob_name = "re-events-test.xlsx"
-larger_results_blob_path = "RE-Events-14-Oct-run4/scraper_results/url-list/larger_website_urls/"
-smaller_results_blob_path = "RE-Events-14-Oct-run4/scraper_results/url-list/smaller_website_urls/"
+larger_results_blob_path = f"{BASE_FOLDER}/scraper_results/url-list/larger_website_urls/"
+smaller_results_blob_path = f"{BASE_FOLDER}/scraper_results/url-list/smaller_website_urls/"
 
 
 website_pattern = re.compile(r'^(https?://)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})$')
@@ -120,9 +114,9 @@ def get_links_from_url(url, start_url, all_links, new_links):
                     if link not in all_links:
                         new_links.append(link)
                         all_links.append(link)
-                        print(link)
+                        logging.info(link)
     except Exception as e:
-        print(e)
+        logging.info(e)
 
 
 def get_links_from_url_with_js(url, start_url, all_links, new_links):
@@ -143,9 +137,9 @@ def get_links_from_url_with_js(url, start_url, all_links, new_links):
                     if link not in all_links:
                         new_links.append(link)
                         all_links.append(link)
-                        print(link)
+                        logging.info(link)
     except Exception as e:
-        print(e)
+        logging.info(e)
 
 
 def extract_urls_for_site(start_url):
@@ -158,9 +152,8 @@ def extract_urls_for_site(start_url):
         url = new_links.pop()
         get_links_from_url(url, start_url, all_links, new_links)
         if len(all_links) > max_url_limit:
-            print("Max url limit reached")
+            logging.info("Max url limit reached")
             break
-    website_name = extract_domain(start_url)
     website_name = extract_domain(start_url)
     url_end_time = time.perf_counter()
     total_time = url_end_time - url_start_time
@@ -177,10 +170,6 @@ def extract_urls_for_site(start_url):
 
 def test_main_url_extractor():
     url_list = load_urls_from_blob(json_blob_name)
-    # excel_data = load_urls_from_excel (excel_blob_name)
-    # url_list = excel_data['Company Website']
-    # print (url_list)
-
     url_filename_list = [[extract_domain(url) + "_urls.json", url] for url in url_list]
     blob_list = container_client.list_blobs()
     existing_files = [blob.name for blob in blob_list]
@@ -195,8 +184,8 @@ def test_main_url_extractor():
             try:
                 future.result()
             except Exception as e:
-                print(f"An error occurred: {e}")
+                logging.info(f"An error occurred: {e}")
 
     end_time = time.perf_counter()
     total_time = end_time - start_time
-    print(f"\nTotal time taken: {total_time} seconds\n")
+    logging.info(f"\nTotal time taken: {total_time} seconds\n")
