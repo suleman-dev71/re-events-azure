@@ -22,6 +22,7 @@ AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
 container_client = blob_service_client.get_container_client(CONTAINER_NAME)
 
+# review: like I said, move all constants to separate file
 # Blob File paths
 json_blob_name = "start-urls.json"
 excel_blob_name = "re-events-test.xlsx"
@@ -142,12 +143,15 @@ def get_links_from_url_with_js(url, start_url, all_links, new_links):
         logging.info(e)
 
 
+#review: the following method is unnecessarily complex
 def extract_urls_for_site(start_url):
+    #review why not `new_links = [start_url]` instead?
     new_links = []
     all_links = []
     url_start_time = time.perf_counter()
     new_links.append(start_url)
     all_links.append(start_url)
+    #review why not a for loop here? Also, we should add a duplicate url check
     while len(new_links) > 0:
         url = new_links.pop()
         get_links_from_url(url, start_url, all_links, new_links)
@@ -184,6 +188,7 @@ def test_main_url_extractor():
             try:
                 future.result()
             except Exception as e:
+                #review: do logging.error for errors
                 logging.info(f"An error occurred: {e}")
 
     end_time = time.perf_counter()
