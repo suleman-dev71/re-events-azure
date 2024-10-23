@@ -13,7 +13,7 @@ import signal
 import os
 import logging
 from dotenv import load_dotenv
-from const import BASE_FOLDER, CONTAINER_NAME
+from const import BASE_FOLDER, CONTAINER_NAME, current_date
 
 load_dotenv()
 AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
@@ -151,14 +151,14 @@ def main_gpt_script():
 
             # Load existing manual reviews and results from Azure Blob Storage if they exist
             try:
-                manual_review_blob = f"{result_path}manual_review_gpt_4o_15_Oct_run.json"
+                manual_review_blob = f"{result_path}manual_review_gpt_4o_{current_date}_run.json"
                 manual_review_data = download_blob(manual_review_blob)
                 manual_review["review_manually"].extend(manual_review_data.get("review_manually", []))
             except Exception as e:
                 logging.info(f"No previous manual reviews found or failed to download: {e}")
 
             try:
-                result_blob = f"{result_path}results_gpt_4o_15_Oct_run.json"
+                result_blob = f"{result_path}results_gpt_4o_{current_date}_run.json"
                 existing_results = download_blob(result_blob)
                 existing_results.update(results)
                 results = existing_results
@@ -166,16 +166,16 @@ def main_gpt_script():
                 logging.info(f"No previous results found or failed to download: {e}")
 
             # Save results and manual reviews to Azure Blob Storage
-            upload_blob(f"{result_path}manual_review_gpt_4o_15_Oct_run.json", manual_review)
-            upload_blob(f"{result_path}results_gpt_4o_15_Oct_run.json", results)
+            upload_blob(f"{result_path}manual_review_gpt_4o_{current_date}_run.json", manual_review)
+            upload_blob(f"{result_path}results_gpt_4o_{current_date}_run.json", results)
 
             # Wait for a short time before checking the folder again
             time.sleep(5)
 
     except KeyboardInterrupt:
         logging.info("Process interrupted. Saving data...")
-        upload_blob(f"{result_path}manual_review_gpt_4o_15_Oct_run.json", manual_review)
-        upload_blob(f"{result_path}results.json_gpt_4o_15_Oct_run", results)
+        upload_blob(f"{result_path}manual_review_gpt_4o_{current_date}_run.json", manual_review)
+        upload_blob(f"{result_path}results.json_gpt_4o_{current_date}_run", results)
 
     end_time = time.perf_counter()
     total_time = end_time - start_time

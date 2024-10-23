@@ -14,7 +14,7 @@ from const import CONTAINER_NAME, BASE_FOLDER
 load_dotenv()
 start_time = time.perf_counter()
 website_pattern = re.compile(r'^(https?://)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})$')
-max_concurrent_runs = 2
+max_concurrent_runs = 1
 AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 APIFY_CLIENT_API = os.getenv('APIFY_CLIENT_API')
 
@@ -26,6 +26,59 @@ client = ApifyClient(APIFY_CLIENT_API)
 # Blob File paths
 input_blob_name = f"{BASE_FOLDER}/url-classifier-results/sorted-url-lists/"
 output_blob_path = f"{BASE_FOLDER}/website_content/"
+processed_blob_path = f"{BASE_FOLDER}/processed_files/larger_sites"
+logging.basicConfig(level=logging.INFO)
+
+
+def move_files_to_processed(blob_names, destination_folder=processed_blob_path):
+    for blob_name in blob_names:
+        try:
+            source_blob_client = container_client.get_blob_client(blob_name)
+            destination_blob_name = f"{destination_folder}/{blob_name.split('/')[-1]}"
+            destination_blob_client = container_client.get_blob_client(destination_blob_name)
+            copy_source = source_blob_client.url
+            destination_blob_client.start_copy_from_url(copy_source)
+            copy_status = destination_blob_client.get_blob_properties().copy.status
+            while copy_status == 'pending':
+                copy_status = destination_blob_client.get_blob_properties().copy.status
+            if copy_status == 'success':
+                source_blob_client.delete_blob()
+                logging.info(f"Successfully moved {blob_name} to {destination_blob_name}")
+            else:
+                logging.error(f"Failed to move {blob_name}. Copy status: {copy_status}")
+
+        except Exception as e:
+            logging.error(f"Error moving {blob_name}: {e}")
+
+def move_single_file_to_processed(blob_name, destination_folder=processed_blob_path):
+    try:
+        source_blob_client = container_client.get_blob_client(blob_name)
+        destination_blob_name = f"{destination_folder}/{blob_name.split('/')[-1]}"
+        destination_blob_client = container_client.get_blob_client(destination_blob_name)
+        copy_source = source_blob_client.url
+        destination_blob_client.start_copy_from_url(copy_source)
+        copy_status = destination_blob_client.get_blob_properties().copy.status
+
+        while copy_status == 'pending':
+            copy_status = destination_blob_client.get_blob_properties().copy.status
+
+        if copy_status == 'success':
+            source_blob_client.delete_blob()
+            logging.info(f"Successfully moved {blob_name} to {destination_blob_name}")
+        else:
+            logging.error(f"Failed to move {blob_name}. Copy status: {copy_status}")
+
+    except Exception as e:
+        logging.error(f"Error moving {blob_name}: {e}")
+
+# Read URL list from Azure Blob Storage
+def load_urls_from_blob(blob_name):
+    blob_client = container_client.get_blob_client(blob_name)
+    data = blob_client.download_blob().readall()
+    decoded_data = data.decode('utf-8')
+    json_data = json.loads(decoded_data)
+    logging.info(f"\nLoaded {len(json_data)} URLs.")
+    return json_data
 
 def read_json_blob(blob_name):
     """Read the JSON file from Azure Blob Storage."""
@@ -34,15 +87,32 @@ def read_json_blob(blob_name):
     data = json.loads(download_stream.readall())
     return data
 
-def upload_json_blob(blob_name, data):
-    """Upload JSON data to Azure Blob Storage."""
-    blob_client = container_client.get_blob_client(blob_name)
-    json_data = json.dumps(data, indent=4)
-    blob_client.upload_blob(json_data, overwrite=True)
-
-def run_actor(file_blob_name, timeout=80):
-    data = read_json_blob(file_blob_name)
+def upload_data_to_blob(blob_name, data):
+    try:
+        blob_client = container_client.get_blob_client(blob_name)
+        if blob_client.exists():
+            existing_data = json.loads(blob_client.download_blob().readall().decode('utf-8'))
+            if isinstance(existing_data, list) and isinstance(data, list):
+                combined_data = existing_data + data
+            elif isinstance(existing_data, dict) and isinstance(data, dict):
+                combined_data = {**existing_data, **data}
+            else:
+                logging.error(f"Data format mismatch in {blob_name}: Cannot combine.")
+                return
+        else:
+            combined_data = data  # No existing data, just use the new data
+        
+        blob_client.upload_blob(json.dumps(combined_data), overwrite=True)
+        logging.info(f"Uploaded data to Blob Storage at {blob_name}")
     
+    except Exception as e:
+        logging.error(f"Failed to upload data to {blob_name}: {e}")
+
+
+
+def run_actor(file_blob_name, timeout=100):
+    data = read_json_blob(file_blob_name)
+
     if isinstance(data, list) and all(isinstance(url, str) for url in data):
         urls = data
     else:
@@ -121,25 +191,34 @@ def run_actor(file_blob_name, timeout=80):
                 'url': url,
                 'content': content
             })
-    
+
     output_blob_name = f"{output_blob_path}{website_name}-data.json"
-    upload_json_blob(output_blob_name, total_site_data)
+    upload_data_to_blob(output_blob_name, total_site_data)
     return website_name
 
 
 def website_crawler():
-
+    start_time = time.perf_counter()
     blob_list = container_client.list_blobs(name_starts_with=input_blob_name)
-    existing_files = [blob.name for blob in blob_list if blob.name.endswith('.json')]
-    
-    with ThreadPoolExecutor(max_workers=max_concurrent_runs) as executor:
-        futures = [executor.submit(run_actor, file) for file in existing_files]
-        for future in as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                logging.info(f"An error occurred: {e}")
+    existing_files = [blob.name for blob in blob_list if blob.name.endswith('.json')][:1]
 
+    if not existing_files:
+        logging.error("No JSON files found in the specified path.")
+        return
+    blob_name = existing_files[0]
+    url_list = load_urls_from_blob(blob_name)
+    
+    if not isinstance(url_list, list):
+        logging.error(f"Expected a list of URLs but got {type(url_list)} in {blob_name}")
+        return
+    
+    try:
+        run_actor(blob_name)
+        move_single_file_to_processed(blob_name)
+
+    except Exception as e:
+        logging.error(f"An error occurred while processing {blob_name}: {e}")
+    
     end_time = time.perf_counter()
     total_time = end_time - start_time
     logging.info(f"\nTotal time taken: {total_time} seconds\n")

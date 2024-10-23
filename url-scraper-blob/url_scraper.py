@@ -7,7 +7,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from requests_html import HTMLSession
 import pandas as pd
-from excluded_words import excluded_words
+from exclusion import excluded_words
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from dotenv import load_dotenv
 import logging
@@ -22,7 +22,7 @@ container_client = blob_service_client.get_container_client(container_name)
 
 # File paths
 json_blob_name = "start-urls.json"
-excel_blob_name = 're_2024.xlsx'
+excel_blob_name = "re_2024.xlsx"
 larger_results_blob_path = "results/url-list/larger_website_urls/"
 smaller_results_blob_path = "results/url-list/smaller_website_urls/"
 website_pattern = re.compile(r'^(https?://)?(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})$')

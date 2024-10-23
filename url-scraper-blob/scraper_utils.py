@@ -1,4 +1,4 @@
-from excluded_words import excluded_words
+from exclusion import excluded_words
 from urllib.parse import urlparse
 
 def contains_excluded_words(string):

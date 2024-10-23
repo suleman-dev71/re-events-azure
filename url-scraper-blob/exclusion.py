@@ -15,6 +15,7 @@ excluded_words = [
     ".jpeg",
     ".pdf",
     ".zip",
+    "/pdfviewer",
     "/ad",
     "/ae",
     "/af",
